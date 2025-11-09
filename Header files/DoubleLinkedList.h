@@ -25,18 +25,13 @@ DoubleLinkedList CreateList(int size);
 //! \return Если удалось добавить элемент, true, иначе false.
 bool Add(DoubleLinkedList& list, int value, int index);
 
-//! \brief Исключает узел из двусвязного списка.
-//! \param list Структура двусвязного списка.
-//! \param node Узел для исключения.
-void NodeExeptions(DoubleLinkedList& list, Node* node);
-
 //! \brief Удаление узла по значению.
 //! \param list Структура двусвязного списка.
 //! \param value Значение узла.
 //! \return Если удалось удалить элемент, true, иначе false.
 bool Remove(DoubleLinkedList& list, int value);
 
-//! \brief Сортировка списка.
+//! \brief Сортировка списка пузырьком.
 //! \param list Структура двусвязного списка.
 void Sort(DoubleLinkedList& list);
 
@@ -45,3 +40,7 @@ void Sort(DoubleLinkedList& list);
 //! \param value Значение узла.
 //! \return Индекс, если удалось найти, иначе -1.
 int LinearSearch(DoubleLinkedList& list, int value);
+
+//! \brief Удалякт все элементы списка.
+//! \param list Структура двусвязного списка.
+void ClearList(DoubleLinkedList& list);

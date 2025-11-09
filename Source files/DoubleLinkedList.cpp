@@ -99,24 +99,36 @@ bool Add(DoubleLinkedList& list, int value, int index)
 	}
 }
 
+//! \brief Исключает узел из двусвязного списка.
+//! \param list Структура двусвязного списка.
+//! \param node Узел для исключения.
 void NodeExeptions(DoubleLinkedList& list, Node* node)
 {
-	if (node->last != nullptr)
+	if (list.size > 1)
 	{
-		node->last->next = node->next;
+		if (node == list.head)
+		{
+			node->next->last = nullptr;
+			list.head = node->next;
+		}
+		else if (node == list.tail)
+		{
+			node->last->next = nullptr;
+			list.tail = node->last;
+		}
+		else
+		{
+			node->last->next = node->next;
+			node->next->last = node->last;
+		}
 	}
 	else
 	{
-		list.head = node->next;
+		list.head = nullptr;
+		list.tail = nullptr;
 	}
-	if (node->next != nullptr)
-	{
-		node->next->last = node->last;
-	}
-	else
-	{
-		list.tail = node->last;
-	}
+	node->last = nullptr;
+	node->next = nullptr;
 }
 
 bool Remove(DoubleLinkedList& list, int value)
@@ -162,20 +174,34 @@ Node* GetMinNode(DoubleLinkedList list, Node* startNode)
 	return minNode;
 }
 
+//! \brief Меняет местами соседние узлы.
+//! \param firstNode Первый узел.
+//! \param secondNode Второй узел.
+void SwapNeighborNode(DoubleLinkedList& list, Node* node, Node* nextNode)
+{
+	NodeExeptions(list, node);
+	InsertionNode(list, node, nextNode->next);
+}
+
 void Sort(DoubleLinkedList& list)
 {
 	if (list.size > 1)
 	{
-		Node* startNode = list.head;
-		while (startNode != nullptr)
+		for (int end = list.size - 1; end > 1; end--)
 		{
-			Node* minNode = GetMinNode(list, startNode);
-			if (startNode != minNode)
+			Node* node = list.head;
+			for (int i = 0; i < end; i++)
 			{
-				NodeExeptions(list, minNode);
-				InsertionNode(list, minNode, startNode);
+				Node* nextNode = node->next;
+				if (node->value > nextNode->value)
+				{
+					SwapNeighborNode(list, node, nextNode);
+				}
+				else
+				{
+					node = nextNode;
+				}
 			}
-			startNode = minNode->next;
 		}
 	}
 }
@@ -204,5 +230,17 @@ int LinearSearch(DoubleLinkedList& list, int value)
 	else
 	{
 		return -1;
+	}
+}
+
+void ClearList(DoubleLinkedList& list)
+{
+	Node* node = list.tail;
+	while (list.head != nullptr)
+	{
+		NodeExeptions(list, node);
+		delete node;
+		node = list.tail;
+		list.size--;
 	}
 }

@@ -11,33 +11,29 @@ using namespace std;
 //! \param manualsIndexes Список с индексами для списка с инструкциями.
 //! \param size Длина массива manualsIndexes.
 //! \return Возвращает выбор.
-int WriteManualAndChoice(string* manuals, int* manualsIndexes, int size)
+string WriteManual(string* manuals, int* manualsIndexes, int size)
 {
-	cout << "\nManuals:\n";
+	string result = "\nManuals:\n";
 	for (int i = 0; i < size; i++)
 	{
-		cout << i << ". " << manuals[manualsIndexes[i]];
+		result += to_string(i) + ". " + manuals[manualsIndexes[i]];
 	}
-	int choice;
-	cin >> choice;
-	cout << endl;
-
-	return choice;
+	return result;
 }
 
 //! \brief Вывод одно из 2 сообщений.
 //! \param condition Условие.
 //! \param trueMessage Сообщение, если condition == true.
 //! \param falseMessage Сообщение, если condition == false.
-void OutputWithCondition(bool condition, string trueMessage, string falseMessage)
+string MessageByCondition(bool condition, string trueMessage, string falseMessage)
 {
 	if (condition)
 	{
-		cout << trueMessage;
+		return trueMessage;
 	}
 	else
 	{
-		cout << falseMessage;
+		return falseMessage;
 	}
 }
 
@@ -54,23 +50,20 @@ int InputWithMessage(string message)
 
 //! \brief Выводит в консоль двусвязный список.
 //! \param list Структура двусвязного списка.
-void WriteList(DoubleLinkedList list)
+string WriteList(DoubleLinkedList list)
 {
+	string result = "List is empty.";
 	if (list.size != 0)
 	{
-		cout << "List: ";
+		result = "List: ";
 		Node* node = list.head;
 		for (int i = 0; i < list.size; i++)
 		{
-			cout << node->value << ' ';
+			result += to_string(node->value) + ' ';
 			node = node->next;
 		}
 	}
-	else
-	{
-		cout << "List is empty.";
-	}
-	cout << endl;
+	return result + '\n';
 }
 
 //! \brief Выполнение выбранной инструкции.
@@ -85,13 +78,13 @@ void RequestExecution(int choice, string* manuals, DoubleLinkedList& list)
 		{
 			int size = InputWithMessage("Enter the size of list: ");
 			list = CreateList(size);
-			//WriteList(list);
+			cout << WriteList(list);
 
 			break;
 		}
 		case 1:
 		{
-			WriteList(list);
+			cout << WriteList(list);
 
 			break;
 		}
@@ -117,46 +110,31 @@ void RequestExecution(int choice, string* manuals, DoubleLinkedList& list)
 		{
 			int value = InputWithMessage("Enter value for new element: ");
 			int index = InputWithMessage("Enter index for new element(0-" + to_string(list.size) + "): ");
-			chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-			OutputWithCondition(Add(list, value, index), "Element was added.\n", "Incorrect index.\n");
-			chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-			cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "mcs";
+			cout << MessageByCondition(Add(list, value, index), "Element was added.\n", "Incorrect index.\n");
 
 			break;
 		}
 		case 6:
 		{
 			int value = InputWithMessage("Enter value to remove the elements: ");
-			chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-			OutputWithCondition(Remove(list, value), "Elements was removed.\n",
+			cout << MessageByCondition(Remove(list, value), "Elements was removed.\n",
 				"No element with this value was found.\n");
-			chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-			cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "mcs";
 
 			break;
 		}
 		case 7:
 		{
-			auto start = chrono::steady_clock::now();
 			Sort(list);
-			auto end = chrono::steady_clock::now();
-			auto elapsed_mcs = chrono::duration_cast<std::chrono::microseconds>(end - start);
-			cout << "The time: " << elapsed_mcs.count() << " mcs\n";
-			//WriteList(list);
-
+			cout << "List was sorted.\n";
 			break;
 		}
 		case 8:
 		{
 			int value = InputWithMessage("Enter value to search: ");
-			auto start = chrono::steady_clock::now();
 			int index = LinearSearch(list, value);
-			auto end = chrono::steady_clock::now();
-			auto elapsed_mcs = chrono::duration_cast<std::chrono::microseconds>(end - start);
-			cout << "The time: " << elapsed_mcs.count() << " mcs\n";
 			string trueMessage = "Your value(" + to_string(value) +
 				") has index " + to_string(index) + ".\n";
-			OutputWithCondition(index > -1, trueMessage, "Not found.\n");
+			cout << MessageByCondition(index > -1, trueMessage, "Not found.\n");
 
 			break;
 		}
@@ -168,14 +146,9 @@ void RequestExecution(int choice, string* manuals, DoubleLinkedList& list)
 		}
 		case 10:
 		{
-			Node* node = list.tail;
-			while (list.head != nullptr)
-			{
-				NodeExeptions(list, node);
-				delete node;
-				node = list.tail;
-				list.size--;
-			}
+			ClearList(list);
+			cout << "List was cleared.\n";
+			break;
 		}
 	}
 }
@@ -185,26 +158,20 @@ int main()
 	string manuals[] = { "Create list.\n", "Write list.\n",
 		"Get size.\n", "Get head.\n", "Get tail.\n",
 		"Add element.\n", "Remove element.\n",
-		"Sort list.\n", "Linear search.\n", "Exit.\n", "Delete list.\n"};
+		"Sort list.\n", "Linear search.\n", "Exit.\n", "Clear list.\n"};
 	DoubleLinkedList list;
 
 	cout << "\t||Data structures : Double linked list||";
 	while (true)
 	{
 		int* manualsIndexes;
-		int size;
-		if (list.size == 0)
-		{
-			size = 2;
-			manualsIndexes = new int[size] { 0, 9 };
-		}
-		else
-		{
-			size = 10;
-			manualsIndexes = new int[size] { 1, 2, 3, 4, 5, 6, 7, 8, 10, 9 };
-		}
+		int size = list.size == 0 ? 2 : 10;
+		manualsIndexes = size == 2
+			? new int[size] { 0, 9 }
+			: new int[size] { 1, 2, 3, 4, 5, 6, 7, 8, 10, 9 };
 
-		int index = WriteManualAndChoice(manuals, manualsIndexes, size);
+		int index = InputWithMessage(WriteManual(manuals, manualsIndexes, size));
+		cout << endl;
 		if (index >= 0 && index < size)
 		{
 			int choice = manualsIndexes[index];
