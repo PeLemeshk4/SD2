@@ -16,110 +16,112 @@ DoubleLinkedList CreateList(int size)
 	list.size = 0;
 	for (int i = 0; i < size; i++)
 	{
-		Add(list, distForInt(gen), i);
+		Node* node = new Node();
+		node->value = distForInt(gen);
+		Add(list, node, nullptr);
 	}
 
 	return list;
 }
 
-//! \brief Получение узла по индексу.
-//! \param list Структура двусвязного списка.
-//! \param index Индекс узла.
-//! \return Возвращает узел по индексу (если индекс равен количеству узлов в списке, то возвращает nullptr).
 Node* GetNodeWithIndex(DoubleLinkedList list, int index)
 {
-	if (index == 0)
+	Node* nodeUnderIndex = list.head;
+	for (int i = 1; i <= index; i++)
 	{
-		return list.head;
+		nodeUnderIndex = nodeUnderIndex->next;
 	}
-	else if (index == list.size)
-	{
-		return nullptr;
-	}
-	else
-	{
-		Node* nodeUnderIndex = list.head;
-		for (int i = 0; i < index; i++)
-		{
-			nodeUnderIndex = nodeUnderIndex->next;
-		}
 
-		return nodeUnderIndex;
-	}
+	return nodeUnderIndex;
 }
 
-//! \brief Вставка узла перед nodeUnderIndex.
+//! \brief Вставка узла перед nextNode.
 //! \param list Структура двусвязного списка.
 //! \param node Узел для вставки.
-//! \param nodeUnderIndex Узел, перед которым вставляется node (если nullptr, то узел вставляется в конец).
-void InsertionNode(DoubleLinkedList& list, Node* node, Node* nodeUnderIndex)
+//! \param nextNode Узел, перед которым вставляется node (если nullptr, то узел вставляется в конец).
+void InsertionNode(DoubleLinkedList& list, Node* node, Node* nextNode)
 {
-	if (nodeUnderIndex == list.head)
+	if (nextNode == nullptr)
+	{
+		node->last = list.tail;
+		list.tail->next = node;
+		list.tail = node;
+	}	
+	else if (nextNode == list.head)
 	{
 		node->next = list.head;
 		list.head->last = node;
 		list.head = node;
 	}
-	else if (nodeUnderIndex == nullptr)
-	{
-		node->last = list.tail;
-		list.tail->next = node;
-		list.tail = node;
-	}
 	else
 	{
-		node->last = nodeUnderIndex->last;
-		node->next = nodeUnderIndex;
-		nodeUnderIndex->last->next = node;
-		nodeUnderIndex->last = node;
+		node->last = nextNode->last;
+		node->next = nextNode;
+		nextNode->last->next = node;
+		nextNode->last = node;
 	}
 }
 
-bool Add(DoubleLinkedList& list, int value, int index)
+bool AddByIndex(DoubleLinkedList& list, int value, int index)
 {
+	bool result = false;
 	Node* newNode = new Node();
 	newNode->value = value;
 	if (index <= list.size && index >= 0)
 	{
-		if (list.size == 0)
+		Add(list, newNode, GetNodeWithIndex(list, index));
+		result = true;
+	}	
+	return result;
+}
+
+void Add(DoubleLinkedList& list, Node* node, Node* nextNode)
+{
+	if (list.size != 0)
+	{
+		InsertionNode(list, node, nextNode);
+	}
+	else
+	{
+		list.head = node;
+		list.tail = node;
+	}
+	list.size++;
+}
+
+//! \brief Исключает узел из двусвязного списка.
+//! \param list Структура двусвязного списка.
+//! \param node Узел для исключения.
+void NodeExeptions(DoubleLinkedList& list, Node* node)
+{
+	if (list.size > 1)
+	{
+		if (node == list.head)
 		{
-			list.head = newNode;
-			list.tail = newNode;
+			node->next->last = nullptr;
+			list.head = node->next;
+		}
+		else if (node == list.tail)
+		{
+			node->last->next = nullptr;
+			list.tail = node->last;
 		}
 		else
 		{
-			InsertionNode(list, newNode, GetNodeWithIndex(list, index));
+			node->last->next = node->next;
+			node->next->last = node->last;
 		}
-		list.size++;
-		return true;
-	}	
+	}
 	else
 	{
-		return false;
+		list.head = nullptr;
+		list.tail = nullptr;
 	}
+	node->last = nullptr;
+	node->next = nullptr;
 }
 
-void NodeExeptions(DoubleLinkedList& list, Node* node)
-{
-	if (node->last != nullptr)
-	{
-		node->last->next = node->next;
-	}
-	else
-	{
-		list.head = node->next;
-	}
-	if (node->next != nullptr)
-	{
-		node->next->last = node->last;
-	}
-	else
-	{
-		list.tail = node->last;
-	}
-}
-
-bool Remove(DoubleLinkedList& list, int value)
+bool RemoveByValue(DoubleLinkedList& list, int value)
 {
 	bool result = false;
 	if (list.size != 0)
@@ -130,10 +132,7 @@ bool Remove(DoubleLinkedList& list, int value)
 			Node* nextNode = node->next;
 			if (node->value == value)
 			{	
-				NodeExeptions(list, node);
-
-				delete node;
-				list.size--;
+				Remove(list, node);
 				result = true;
 			}	
 			node = nextNode;
@@ -142,40 +141,41 @@ bool Remove(DoubleLinkedList& list, int value)
 	return result;
 }
 
-//! \brief Находит узел с минимальным значением в области от startNode до "хвоста".
-//! \param list Структура двусвязного списка.
-//! \param startNode Левая граница области поиска.
-//! \return Узел с минимальным значением.
-Node* GetMinNode(DoubleLinkedList list, Node* startNode)
+void Remove(DoubleLinkedList& list, Node* node)
 {
-	Node* minNode = startNode;
-	Node* node = minNode->next;
-	while (node != nullptr)
-	{
-		if (minNode->value > node->value)
-		{
-			minNode = node;
-		}
-		node = node->next;
-	}
+	NodeExeptions(list, node);
+	delete node;
+	list.size--;
+}
 
-	return minNode;
+//! \brief Меняет местами соседние узлы.
+//! \param firstNode Первый узел.
+//! \param secondNode Второй узел.
+void SwapNeighborNode(DoubleLinkedList& list, Node* node, Node* nextNode)
+{
+	NodeExeptions(list, node);
+	InsertionNode(list, node, nextNode->next);
 }
 
 void Sort(DoubleLinkedList& list)
 {
 	if (list.size > 1)
 	{
-		Node* startNode = list.head;
-		while (startNode != nullptr)
+		for (int end = list.size - 1; end > 1; end--)
 		{
-			Node* minNode = GetMinNode(list, startNode);
-			if (startNode != minNode)
+			Node* node = list.head;
+			for (int i = 0; i < end; i++)
 			{
-				NodeExeptions(list, minNode);
-				InsertionNode(list, minNode, startNode);
+				Node* nextNode = node->next;
+				if (node->value > nextNode->value)
+				{
+					SwapNeighborNode(list, node, nextNode);
+				}
+				else
+				{
+					node = nextNode;
+				}
 			}
-			startNode = minNode->next;
 		}
 	}
 }
@@ -204,5 +204,17 @@ int LinearSearch(DoubleLinkedList& list, int value)
 	else
 	{
 		return -1;
+	}
+}
+
+void ClearList(DoubleLinkedList& list)
+{
+	Node* node = list.tail;
+	while (list.head != nullptr)
+	{
+		NodeExeptions(list, node);
+		delete node;
+		node = list.tail;
+		list.size--;
 	}
 }
