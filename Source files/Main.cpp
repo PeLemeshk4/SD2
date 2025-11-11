@@ -153,7 +153,11 @@ void RequestExecution(int choice, string* manuals, DoubleLinkedList& list)
 	}
 }
 
-//! \brief 
+//! \brief Операция для замера времени.
+//! \param operationNumber Номер выбранной операции.
+//! \param manuals Список со всеми операциями.
+//! \param n Размер списка.
+//! \param iterationsCount Количество выполнений этой операции.
 void Task2Request(int operationNumber, string* manuals, int n, int iterationsCount)
 {
 	DoubleLinkedList list = CreateList(n);
