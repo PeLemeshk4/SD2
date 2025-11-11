@@ -157,6 +157,15 @@ void SwapNeighborNode(DoubleLinkedList& list, Node* node, Node* nextNode)
 	InsertionNode(list, node, nextNode->next);
 }
 
+//! \brief Меняет местами соседние узлы.
+//! \param firstNode Первый узел.
+//! \param secondNode Второй узел.
+void SwapNeighborNode(DoubleLinkedList& list, Node* node, Node* nextNode)
+{
+	NodeExeptions(list, node);
+	InsertionNode(list, node, nextNode->next);
+}
+
 void Sort(DoubleLinkedList& list)
 {
 	if (list.size > 1)
